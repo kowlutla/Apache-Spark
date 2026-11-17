@@ -63,6 +63,14 @@ public class Main {
         });
         JavaPairRDD<String, Iterable<String>> iterableJavaPairRDD = pairRDD.groupByKey();
 
+        //Flatmap Example
+        List<String> sentences = Arrays.asList("This is the first sentence.", "This is the second sentence.", "This is the third sentence.");
+        JavaRDD<String> sentencesRdd = sparkContext.parallelize(sentences);
+        JavaRDD<String> wordsRdd = sentencesRdd.flatMap(sentence -> Arrays.asList(sentence.split(" ")).iterator());
+        log.info("The words in the sentences are: {}", wordsRdd.collect());
+
+        //Filter Example
+        pairRDD.filter(tuple -> tuple._1.equals("ERROR")).foreach(tuple -> log.info("The error log is: {}", tuple));
         sparkContext.close();
     }
 }
