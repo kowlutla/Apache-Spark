@@ -3,6 +3,7 @@ package com.virtualpairprogrammers;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
@@ -44,6 +45,24 @@ public class Main {
         //Tuple Example
         JavaRDD<Tuple2<Double, Double>> tupleRdd = originalRdd.map(value -> new Tuple2<>(value, Math.sqrt(value)));
         log.info("The tuples of the input data and their square roots are: {}", tupleRdd.collect());
+
+        //pair RDD Example
+        List<String> pairInputData = Arrays.asList("WARN: Tuesday 4 September 0405",
+                "ERROR: Tuesday 4 September 0408",
+                "FATAL: Wednesday 5 September 1632",
+                "ERROR: Friday 7 September 1854",
+                "WARN: Saturday 8 September 1942",
+                "INFO: Saturday 8 September 1942");
+
+        JavaRDD<String> pairOriginalRdd = sparkContext.parallelize(pairInputData);
+        JavaPairRDD<String, String> pairRDD = pairOriginalRdd.mapToPair(rawValue -> {
+            String[] splitValues = rawValue.split(":");
+            String logLevel = splitValues[0];
+            String dateTime = splitValues[1];
+            return new Tuple2<>(logLevel, dateTime);
+        });
+        JavaPairRDD<String, Iterable<String>> iterableJavaPairRDD = pairRDD.groupByKey();
+
         sparkContext.close();
     }
 }
